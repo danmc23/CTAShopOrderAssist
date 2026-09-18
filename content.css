@@ -2,9 +2,8 @@
 
 #cta-labor-warning-banner {
   position: fixed;
-  top: 33vh;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 24px;
+  left: 24px;
   z-index: 2147483647;
   background: #b00020;
   color: #ffffff;
@@ -15,8 +14,13 @@
   border-radius: 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   text-align: center;
-  max-width: 90vw;
-  pointer-events: none;
+  max-width: 40vw;
+  cursor: move;
+  user-select: none;
+}
+
+#cta-labor-warning-banner.cta-dragging {
+  opacity: 0.85;
 }
 
 #cta-labor-warning-banner.cta-flash {
@@ -24,8 +28,8 @@
 }
 
 @keyframes cta-flash-pulse {
-  0%, 100% { transform: translateX(-50%) scale(1); }
-  50% { transform: translateX(-50%) scale(1.08); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
 }
 
 /* Red outline: Labor Time to Report cell is non-zero (or unreadable) */
@@ -54,6 +58,85 @@ button.cta-ok-blocked {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
   pointer-events: none !important;
+}
+
+#cta-override-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  background: #616161;
+  color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+#cta-override-button:hover {
+  background: #757575;
+}
+
+#cta-override-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#cta-override-confirm-modal {
+  background: #ffffff;
+  border: 4px solid #b00020;
+  border-radius: 8px;
+  max-width: 520px;
+  padding: 32px;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+#cta-override-confirm-modal h2 {
+  color: #b00020;
+  margin: 0 0 16px 0;
+  font-size: 22px;
+}
+
+#cta-override-confirm-modal p {
+  font-size: 15px;
+  margin: 0 0 24px 0;
+  color: #222;
+}
+
+#cta-override-confirm-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+#cta-override-confirm-buttons button {
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#cta-override-confirm-buttons button[data-action="cancel"] {
+  background: #e0e0e0;
+  color: #222;
+}
+
+#cta-override-confirm-buttons button[data-action="confirm"] {
+  background: #b00020;
+  color: #fff;
 }
 
 /* Supervisor escalation modal (safety net; should rarely be reachable since OK is blocked) */

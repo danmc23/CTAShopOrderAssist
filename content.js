@@ -14,12 +14,15 @@
   const LABOR_FIELD_LABEL = 'Labor Time to Report';
   const BANNER_ID = 'cta-labor-warning-banner';
   const SUPERVISOR_OVERLAY_ID = 'cta-supervisor-overlay';
+  const OVERRIDE_BUTTON_ID = 'cta-override-button';
+  const OVERRIDE_CONFIRM_ID = 'cta-override-confirm-overlay';
 
   let currentFlyout = null;
   let structureObserver = null;
   let autoZeroAttempted = new WeakSet(); // cells we've already tried to auto-zero this flyout session
   let confirmedCells = new WeakSet(); // cells the user has hovered while they read zero
   let lastValueByCell = new WeakMap(); // detects "value changed since last confirm" to un-confirm
+  let overrideActive = false; // manual override: stop auto-zeroing and unblock OK regardless of values
 
   function findFlyoutRoot() {
     // fnd-modal-assistant ids are page-specific (built from the assistant
@@ -89,15 +92,55 @@
 
     banner.classList.add('cta-flash');
     banner.addEventListener('animationend', () => banner.classList.remove('cta-flash'));
+    makeDraggable(banner);
 
     return banner;
+  }
+
+  // Lets the user drag the banner out of the way. Starts anchored bottom-left
+  // (set in CSS); once dragged, position is pinned with left/top so it stays
+  // wherever the user drops it for the rest of this flyout session.
+  function makeDraggable(el) {
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+
+    el.addEventListener('mousedown', (evt) => {
+      dragging = true;
+      const rect = el.getBoundingClientRect();
+      startX = evt.clientX;
+      startY = evt.clientY;
+      startLeft = rect.left;
+      startTop = rect.top;
+      el.style.left = startLeft + 'px';
+      el.style.top = startTop + 'px';
+      el.style.right = 'auto';
+      el.style.bottom = 'auto';
+      el.classList.add('cta-dragging');
+      evt.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (evt) => {
+      if (!dragging) return;
+      el.style.left = (startLeft + evt.clientX - startX) + 'px';
+      el.style.top = (startTop + evt.clientY - startY) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+      dragging = false;
+      el.classList.remove('cta-dragging');
+    });
   }
 
   function updateBannerText(total, zeroCount, confirmedCount) {
     const banner = document.getElementById(BANNER_ID);
     if (!banner) return;
 
-    if (zeroCount < total) {
+    if (overrideActive) {
+      banner.textContent = 'MANUAL OVERRIDE ACTIVE   Labor Time to Report values are unlocked - proceed with caution';
+    } else if (zeroCount < total) {
       banner.textContent = 'WARNING!   All Labor Time to Report values must be 0 before proceeding';
     } else if (confirmedCount < total) {
       banner.textContent =
@@ -111,6 +154,54 @@
   function removeBanner() {
     const banner = document.getElementById(BANNER_ID);
     if (banner) banner.remove();
+  }
+
+  function ensureOverrideButton() {
+    let button = document.getElementById(OVERRIDE_BUTTON_ID);
+    if (button) return button;
+
+    button = document.createElement('button');
+    button.id = OVERRIDE_BUTTON_ID;
+    button.type = 'button';
+    button.textContent = 'Manual Override';
+    document.body.appendChild(button);
+
+    button.addEventListener('click', showOverrideConfirm);
+
+    return button;
+  }
+
+  function removeOverrideButton() {
+    const button = document.getElementById(OVERRIDE_BUTTON_ID);
+    if (button) button.remove();
+    const confirmOverlay = document.getElementById(OVERRIDE_CONFIRM_ID);
+    if (confirmOverlay) confirmOverlay.remove();
+  }
+
+  function showOverrideConfirm() {
+    if (document.getElementById(OVERRIDE_CONFIRM_ID)) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = OVERRIDE_CONFIRM_ID;
+    overlay.innerHTML =
+      '<div id="cta-override-confirm-modal">' +
+      '<h2>MANUAL OVERRIDE WARNING</h2>' +
+      '<p>You are about to unlock the Labor Time to Report fields for manual entry. ' +
+      'Entering incorrect values here can cause system errors. ' +
+      'Only proceed if you understand the impact.</p>' +
+      '<div id="cta-override-confirm-buttons">' +
+      '<button type="button" data-action="cancel">Cancel</button>' +
+      '<button type="button" data-action="confirm">I Understand, Unlock</button>' +
+      '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('[data-action="cancel"]').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('[data-action="confirm"]').addEventListener('click', () => {
+      overlay.remove();
+      overrideActive = true;
+      if (currentFlyout) refreshFieldState(currentFlyout);
+    });
   }
 
   function showSupervisorWarning() {
@@ -209,12 +300,12 @@
       cell.classList.toggle('cta-labor-unconfirmed', isZero && !isConfirmed);
       cell.classList.toggle('cta-labor-confirmed', isConfirmed);
 
-      if (!isZero) {
+      if (!isZero && !overrideActive) {
         autoZeroCell(cell);
       }
     }
 
-    const allReady = cells.length > 0 && confirmedCount === cells.length;
+    const allReady = overrideActive || (cells.length > 0 && confirmedCount === cells.length);
 
     if (okButton) {
       okButton.classList.toggle('cta-ok-blocked', !allReady);
@@ -244,7 +335,9 @@
   function attachToFlyout(flyout) {
     currentFlyout = flyout;
     autoZeroAttempted = new WeakSet();
+    overrideActive = false;
     ensureBanner();
+    ensureOverrideButton();
     refreshFieldState(flyout);
 
     // Capture-phase listener runs before IFS's own bubble-phase click
@@ -276,7 +369,9 @@
       structureObserver = null;
     }
     currentFlyout = null;
+    overrideActive = false;
     removeBanner();
+    removeOverrideButton();
     const overlay = document.getElementById(SUPERVISOR_OVERLAY_ID);
     if (overlay) overlay.remove();
   }
