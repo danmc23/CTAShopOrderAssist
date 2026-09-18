@@ -28,11 +28,25 @@
   50% { transform: translateX(-50%) scale(1.08); }
 }
 
-/* Red outline on any Labor Time to Report cell that is non-zero (or unreadable) */
+/* Red outline: Labor Time to Report cell is non-zero (or unreadable) */
 fnd-cell.cta-labor-nonzero {
   outline: 3px solid #d32f2f !important;
   outline-offset: -2px;
   box-shadow: inset 0 0 0 2px #d32f2f !important;
+}
+
+/* Amber outline: cell reads 0 but has not yet been hover-confirmed */
+fnd-cell.cta-labor-unconfirmed {
+  outline: 3px solid #f9a825 !important;
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px #f9a825 !important;
+}
+
+/* Green outline: cell reads 0 and has been hover-confirmed */
+fnd-cell.cta-labor-confirmed {
+  outline: 3px solid #2e7d32 !important;
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px #2e7d32 !important;
 }
 
 /* Visual + functional disable of the OK button while any value is non-zero */
