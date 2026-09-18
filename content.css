@@ -1,0 +1,88 @@
+/* CTA Shop Order Labor Time Guard */
+
+#cta-labor-warning-banner {
+  position: fixed;
+  top: 33vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  background: #b00020;
+  color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 14px 24px;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  max-width: 90vw;
+  pointer-events: none;
+}
+
+#cta-labor-warning-banner.cta-flash {
+  animation: cta-flash-pulse 0.5s ease-in-out 4;
+}
+
+@keyframes cta-flash-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.08); }
+}
+
+/* Red outline on any Labor Time to Report cell that is non-zero (or unreadable) */
+fnd-cell.cta-labor-nonzero {
+  outline: 3px solid #d32f2f !important;
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px #d32f2f !important;
+}
+
+/* Visual + functional disable of the OK button while any value is non-zero */
+button.cta-ok-blocked {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* Supervisor escalation modal (safety net; should rarely be reachable since OK is blocked) */
+#cta-supervisor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#cta-supervisor-modal {
+  background: #ffffff;
+  border: 4px solid #b00020;
+  border-radius: 8px;
+  max-width: 520px;
+  padding: 32px;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+#cta-supervisor-modal h2 {
+  color: #b00020;
+  margin: 0 0 16px 0;
+  font-size: 24px;
+}
+
+#cta-supervisor-modal p {
+  font-size: 16px;
+  margin: 0 0 24px 0;
+  color: #222;
+}
+
+#cta-supervisor-modal button {
+  background: #b00020;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}

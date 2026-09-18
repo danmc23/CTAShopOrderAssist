@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "CTA Shop Order Labor Time Guard",
+  "version": "1.0.0",
+  "description": "Warns and blocks the OK action on the IFS Cloud Report Shop Order Operations flyout until all Labor Time to Report values are zero.",
+  "content_scripts": [
+    {
+      "matches": ["*://*/main/ifsapplications/web/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
